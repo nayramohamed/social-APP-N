@@ -1,0 +1,313 @@
+<div class="flex flex-col gap-4 w-full lg:col-start-2 lg:row-start-1">
+
+
+    <form #form (submit)="submitForm($event)"
+        class="w-full bg-white rounded-[16px] shadow-sm border border-slate-200 p-4 font-sans flex flex-col">
+        <div class="flex items-center gap-3 mb-3">
+            <img [src]="currentUser.photo" [alt]="currentUser.name"
+                class="w-10 h-10 rounded-full object-cover shrink-0 bg-slate-100 border border-slate-50" />
+
+            <div>
+                <span class="text-[15px] font-bold text-slate-900 leading-tight">{{currentUser.name}}</span>
+
+                <div
+                    class="flex p-1 w-fit items-center bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                    <i class="fa-solid fa-earth-americas text-[11px] text-slate-600"></i>
+
+                    <select [formControl]="privacy"
+                        class="border-none bg-transparent cursor-pointer ring-0 py-0 px-2 text-xs outline-none">
+                        <option value="public">public</option>
+                        <option value="following">followers</option>
+                        <option value="only_me">only me</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="mb-4">
+            <textarea [formControl]="content"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-[15px] text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all resize-none min-h-[100px]"
+                placeholder="What's on your mind...?" aria-label="Create a new post"></textarea>
+        </div>
+
+        <hr class="border-t border-slate-100 mb-3" />
+
+        @if (imgUrl) {
+        <div class="flex flex-wrap gap-2 my-2">
+
+            <div class="relative w-32 h-32">
+                <img [src]="imgUrl" class="w-full h-full object-cover rounded-lg" alt="Selected Image">
+
+                <button type="button" (click)="removeImg()"
+                    class="absolute top-1 right-1 bg-gray-800/60 hover:bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors cursor-pointer"
+                    title="Remove image">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+        </div>
+        }
+
+        <div class="flex items-center justify-between">
+            <input (change)="changeImg($event)" type="file" id="file" class="hidden" accept="image/*,video/*" />
+            <label for="file"
+                class="flex cursor-pointer items-center gap-2 text-slate-600 hover:bg-slate-50 px-2 py-1.5 rounded-lg transition-colors group">
+                <i
+                    class="fa-regular fa-image text-[#22c55e] text-[1.2rem] group-hover:scale-110 transition-transform"></i>
+                <span class="text-[14px] font-semibold text-slate-600">Photo / video</span>
+            </label>
+
+            <div class="flex items-center gap-2">
+                @if (isEditMode) {
+                <button type="button" (click)="cancelEdit()"
+                    class="cursor-pointer bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-bold text-[14px] outline-none hover:bg-slate-300 transition-colors">
+                    Cancel
+                </button>
+
+                <button type="button" (click)="updatePost($event)"
+                    class="cursor-pointer bg-green-500 text-white px-5 py-2 rounded-xl font-bold text-[14px] flex items-center gap-2 outline-none hover:bg-green-600 transition-colors">
+                    Update
+                    <i class="fa-solid fa-pen text-sm"></i>
+                </button>
+                } @else {
+                <button type="submit"
+                    class="cursor-pointer bg-blue-500 text-white px-5 py-2 rounded-xl font-bold text-[14px] flex items-center gap-2 outline-none hover:bg-blue-600 transition-colors">
+                    Post
+                    <i class="fa-regular fa-paper-plane text-sm"></i>
+                </button>
+                }
+            </div>
+        </div>
+    </form>
+
+
+    @for (post of postList; track post._id) {
+    <div class="bg-white rounded-[16px] shadow-sm border border-slate-200 p-4 font-sans">
+        <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+                <img [src]="post.user.photo" [alt]="post.user"
+                    class="size-10 rounded-full object-cover shrink-0 bg-slate-100 border border-slate-50" />
+
+                <div>
+                    <span [routerLink]="['/profile', post.user._id]"
+                        class="text-[15px] font-bold text-slate-900 leading-tight hover:underline cursor-pointer">{{post.user.name}}
+                    </span>
+                    <div class="flex items-center text-[13px] text-slate-500 mt-0.5 gap-1">
+                        <span class="hover:underline cursor-pointer">@{{post.user.username}}</span>
+                        <span>&middot;</span>
+                        <span class="hover:underline cursor-pointer">{{post.createdAt | timeAgo }}</span>
+                        <span>&middot;</span>
+
+                        <div
+                            class="p-0 w-fit items-center bg-neutral-secondary-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                            @if (post.user._id === currentUser._id) {
+                            <select (change)="updatePrivacy(post._id, $event)"
+                                class="border-none bg-transparent cursor-pointer ring-0 py-0 px-2 text-xs outline-none">
+                                <option [selected]="post.privacy === 'public'" value="public">public</option>
+                                <option [selected]="post.privacy === 'following'" value="following">followers</option>
+                                <option [selected]="post.privacy === 'only_me'" value="only_me">only me</option>
+                            </select>
+                            }
+                            @else {
+                            <span class="border-none bg-transparent ring-0 py-0 px-2 text-xs outline-none">
+                                {{post.privacy}} </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative group">
+                <button id="dropdownMenuIconButton" data-dropdown-toggle="dropdownDots"
+                    class="text-heading bg-neutral-primary box-border hover:bg-neutral-secondary-medium focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm p-2 focus:outline-none"
+                    type="button">
+                    <svg class="w-6 h-6 text-slate-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                        height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
+                            d="M12 6h.01M12 12h.01M12 18h.01" />
+                    </svg>
+                </button>
+
+                <div id="dropdownDots"
+                    class="z-30 hidden group-hover:block absolute right-0 bg-white border border-slate-100 rounded-xl shadow-lg w-44">
+                    <ul class="p-2 text-sm text-slate-700 font-medium" aria-labelledby="dropdownMenuIconButton">
+                        <li>
+                            <button
+                                class="inline-flex items-center w-full p-2 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
+                                Save Post
+                            </button>
+                            @if (post.user._id === currentUser._id) {
+                            <button (click)="EditPost(post)"
+                                class="inline-flex items-center w-full p-2 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
+                                Edit post
+                            </button>
+                            <button (click)="deletePostItem(post._id)"
+                                class="inline-flex text-red-600 items-center w-full p-2 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors">
+                                Delete post
+                            </button>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="text-[15px] text-slate-900 mb-4">
+            @if (post.body) {
+            <p>{{post.body}}</p>
+            }
+            @if (post.image && !post.sharedPost) {
+            <div class="rounded-xl overflow-hidden border border-slate-100 shadow-inner mt-3">
+                <img [src]="post.image" class="w-full h-auto max-h-[500px] object-cover" />
+            </div>
+            }
+        </div>
+
+
+        @if (post.sharedPost) {
+        <div class="border border-slate-200 rounded-2xl p-4 mb-2 bg-slate-50/50 hover:bg-slate-50 transition-all">
+
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <img [src]="post.sharedPost.user.photo" class="w-8 h-8 rounded-full object-cover">
+                    <div class="flex flex-col">
+                        <span class="font-bold text-[13px] text-slate-900">{{post.sharedPost.user.name}}</span>
+                        <span class="text-[11px] text-slate-500">@{{post.sharedPost.user.username}}</span>
+                    </div>
+                </div>
+
+                <button [routerLink]="['/details', post.sharedPost._id]"
+                    class="cursor-pointer text-[11px] text-blue-600 bg-slate-50/50 border border-slate-200 px-3 py-1 rounded-lg hover:bg-blue-50 transition-colors shadow-xs">
+                    View Original <i class="fa-solid fa-arrow-up-right-from-square ml-1"></i>
+                </button>
+            </div>
+
+            <p class="text-[14px] text-slate-600 mb-2 line-clamp-3">
+                {{post.sharedPost.body}}
+            </p>
+
+            @if (post.sharedPost.image) {
+            <div class="rounded-xl overflow-hidden border border-slate-100 max-h-60 pb-2">
+                <img [src]="post.sharedPost.image" class="w-full h-full object-cover">
+            </div>
+            }
+        </div>
+        }
+
+        <div class="flex items-center justify-between text-[13px] text-slate-500 mb-3 px-1">
+            <div class="flex items-center gap-1.5 cursor-pointer hover:underline">
+                <div class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px]">
+                    <i class="fa-solid fa-thumbs-up"></i>
+                </div>
+                <span>{{post.likesCount}}</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="cursor-pointer hover:underline">{{post.sharesCount}} shares</span>
+                <span class="cursor-pointer hover:underline">{{post.commentsCount}} comments</span>
+                <button [routerLink]="['/details',   post._id]"
+                    class="font-semibold cursor-pointer text-blue-600 hover:underline">
+                    View details
+                </button>
+            </div>
+        </div>
+
+        <hr class="border-t border-slate-100 mb-1" />
+
+
+        <div class="flex items-center justify-between px-1 py-1 gap-1">
+            <button (click)="onLikeClick(post)"
+                class="flex-1 cursor-pointer flex items-center justify-center gap-2 text-slate-600 font-semibold text-[14px] hover:bg-slate-50 py-2.5 rounded-lg transition-colors group "
+                [class.text-blue-600]="post.isLiked" [class.text-slate-600]="!post.isLiked">
+                <i [class]="post.isLiked ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
+                Like
+            </button>
+
+            <button #com (click)="toggleComments(post._id)"
+                class="flex-1 flex cursor-pointer items-center justify-center gap-2 text-slate-600 font-semibold text-[14px] hover:bg-slate-50 py-2.5 rounded-lg transition-colors">
+                <i class="fa-regular fa-comment"></i>
+                Comment
+            </button>
+
+            <button (click)="openShareModal(post)"
+                class="flex-1 flex cursor-pointer items-center justify-center gap-2 text-slate-600 font-semibold text-[14px] hover:bg-slate-50 py-2.5 rounded-lg transition-colors">
+                <i class="fa-solid fa-share-nodes"></i>
+                Share
+            </button>
+        </div>
+
+        <hr class="border-t border-slate-100 mt-1 mb-4" />
+
+
+        @if (isShareModalOpen && selectedPostForShare) {
+        <div
+            class="fixed inset-0 z-[999] flex items-center justify-center bg-transparent p-2.5 animate-in fade-in duration-200">
+
+            <div class="fixed inset-0 bg-transparent cursor-default" (click)="closeShareModal()"></div>
+
+            <div
+                class="relative z-[1000] bg-white rounded-[30px] w-full max-w-[580px] max-h-[600px] border border-slate-200 overflow-hidden animate-in zoom-in duration-300 flex flex-col">
+
+                <div class="flex items-center justify-between pt-1 border-b border-slate-100 bg-white">
+                    <h3 class="text-lg font-bold text-slate-900 flex-1 ml-3">Share post</h3>
+                    <button (click)="closeShareModal()"
+                        class="cursor-pointer text-slate-400 hover:text-white hover:bg-red-500 rounded-full me-2 p-2 transition-colors">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="p-4 space-y-4 overflow-y-auto max-h-[70vh] bg-white">
+
+                    <textarea [formControl]="shareContent"
+                        class="w-full h-18 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-[16px] placeholder-slate-500 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 outline-none resize-none transition-all"
+                        placeholder="What's on your mind?"></textarea>
+
+                    <div class="border border-slate-200 rounded-2xl p-2.5 space-y-3 bg-white">
+
+                        <div class="flex items-center gap-3">
+                            <img [src]="selectedPostForShare.user.photo"
+                                class="w-10 h-10 rounded-full object-cover border border-slate-100">
+                            <div class="flex flex-col">
+                                <h4 class="font-bold text-[15px] text-slate-900 leading-tight">
+                                    {{selectedPostForShare.user.name}}
+                                </h4>
+                                <span class="text-[12px] text-slate-500 mt-0.5">
+                                    {{selectedPostForShare.user.username}} &middot; {{selectedPostForShare.createdAt |
+                                    timeAgo }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <p class="text-[14px] text-slate-700 leading-relaxed line-clamp-3">
+                            {{selectedPostForShare.body}}
+                        </p>
+
+                        @if (selectedPostForShare.image) {
+                        <div class="rounded-xl overflow-hidden border border-slate-100 max-h-70">
+                            <img [src]="selectedPostForShare.image" class="w-full h-full object-cover">
+                        </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="p-2 border-t border-slate-100 flex justify-end gap-3 bg-white">
+                    <button (click)="closeShareModal()"
+                        class="cursor-pointer px-5 py-2.5 text-[15px] text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors">
+                        Cancel
+                    </button>
+                    <button (click)="confirmShare($event)"
+                        class="cursor-pointer px-5 py-2 text-[15px] bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg hover:shadow-blue-200 transition-all">
+                        Share now
+                    </button>
+                </div>
+            </div>
+        </div>
+        }
+
+        
+        <app-comments [postId]="post._id"></app-comments>
+      
+
+    </div>
+    }
+</div>

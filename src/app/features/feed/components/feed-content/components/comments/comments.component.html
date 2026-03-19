@@ -1,0 +1,222 @@
+@if (isSectionVisible || commentsList.length > 0) {
+<section class="mt-4" aria-label="Comments">
+
+    @if (!showAllComments && commentsList.length > 0){
+    <div class="border border-slate-200 rounded-[16px] p-3.5 bg-[#f0f2f5] shadow-sm">
+        <h4 class="text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-2.5">Top Comment</h4>
+
+        <div class="flex items-start gap-2.5 mb-3">
+            <img [src]="commentsList[0].commentCreator.photo" alt=""
+                class="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5" />
+
+            <div class="bg-white rounded-[16px] px-3.5 py-2 inline-block w-full">
+                <span
+                    class="block text-[13px] font-bold text-slate-900 leading-tight">{{commentsList[0].commentCreator.name}}</span>
+                <p class="text-[13px] text-slate-900 mt-0.5">{{commentsList[0].content}}</p>
+            </div>
+        </div>
+
+        <button (click)="showAllComments = true"
+            class="text-blue-600 font-bold text-[13px] hover:underline cursor-pointer outline-none text-left w-full transition-all">
+            View all comments
+        </button>
+    </div>
+    }
+
+    @if (showAllComments || (isSectionVisible && commentsList.length === 0)) {
+    <div class="border border-slate-200 rounded-[16px] p-4 bg-white shadow-sm">
+
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+                <h3 class="font-bold text-[15px] text-slate-900">Comments</h3>
+                <span
+                    class="bg-blue-50 text-blue-600 text-[11px] font-bold px-2 py-0.5 rounded-full">{{commentsList.length}}</span>
+
+            </div>
+
+            <div class="flex items-center gap-3">
+                <select
+                    class="bg-white border border-slate-200 text-slate-700 text-[12px] font-semibold rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 block py-1.5 px-2.5 outline-none cursor-pointer">
+                    <option value="relevant">Most relevant</option>
+                    <option value="newest">Newest</option>
+                    <option value="all">All comments</option>
+                </select>
+                @if (commentsList.length > 0) {
+                <button (click)="showAllComments = false"
+                    class="bg-gray-800/60 hover:bg-red-500 text-white rounded-full w-6 h-6 cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                }
+            </div>
+        </div>
+
+
+        @for (comment of commentsList ; track comment._id) {
+        <div class="flex gap-2 mb-3 relative">
+            <img [src]="comment.commentCreator.photo" class="size-9 rounded-full z-10 shadow-sm">
+
+            <div class="flex-1">
+                <div class="inline-block bg-[#F0F2F5] px-3 py-2 rounded-[18px] relative group">
+                    <div class="flex items-center justify-between gap-2">
+                        <div>
+                            <h4 class="font-bold text-[13px] text-slate-900">{{comment.commentCreator.name}}</h4>
+                            <p class="text-[15px] text-[#050505] leading-tight">{{comment.content}}</p>
+                        </div>
+
+                        @if (comment.commentCreator._id === currentUser._id) {
+                        <div class="relative">
+                            <button (click)="toggleMenu(comment._id); $event.stopPropagation()"
+                                class="opacity-0 group-hover:opacity-100 p-2 hover:bg-gray-100 rounded-full cursor-pointer">
+                                <i class="fa-solid fa-ellipsis text-gray-500"></i>
+                            </button>
+
+                            @if (activeMenuId === comment._id) {
+                            <div class="fixed inset-0 w-full h-full bg-black/0 z-[999]" (click)="activeMenuId = null">
+                            </div>
+
+                            <div
+                                class="absolute left-0 mt-1 w-28 bg-white border border-gray-100 rounded-lg shadow-xl z-[1000] py-1 overflow-hidden">
+                                <button (click)="startEditComment(comment, postId)"
+                                    class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
+                                    <i class="fa-solid fa-pen text-blue-500 text-[10px]"></i> Edit
+                                </button>
+                                <button (click)="deleteComment(postId, comment._id)"
+                                    class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 flex items-center gap-2 border-t border-gray-50">
+                                    <i class="fa-solid fa-trash text-[10px]"></i> Delete
+                                </button>
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="flex gap-4 mt-1 ml-2 text-[12px] font-bold text-[#65676B]">
+                    <button (click)="toggleLike(comment)" [class.text-blue-600]="isLiked(comment)"
+                        class="hover:underline cursor-pointer">Like
+                        @if (comment.likes) {
+                        <span [class.text-blue-600]="isLiked(comment)" class="ml-1 text-[#65676B]">
+                            ({{ comment.likes.length }})
+                        </span>
+                        }
+                    </button>
+                    <button (click)="toggleReplyInput(comment._id)" class="hover:underline cursor-pointer">Reply
+                        @if (comment.repliesCount > 0) {
+                        <span class="ml-1 text-[#65676B]">
+                            ({{ comment.repliesCount }})
+                        </span>
+
+                        }</button>
+                    <span class="font-normal">{{comment.createdAt | timeAgo}}</span>
+                </div>
+
+
+
+                <div class="mt-2 space-y-3 relative">
+                    @if (activeCommentId === comment._id) {
+                    <div class="absolute left-[-22px] top-[-15px] bottom-6 w-[2px] bg-[#CED0D4] rounded-full"></div>
+
+                    @for (reply of repliesMap[comment._id]; track reply._id) {
+                    <div class="flex gap-2 relative">
+                        <div class="absolute left-[-22px] top-4 w-5 h-[2px] bg-[#CED0D4]"></div>
+
+                        <img [src]="reply?.commentCreator?.photo" class="size-7 rounded-full z-10">
+                        <div class="flex-1">
+                            <div class="inline-block bg-[#F0F2F5] px-3 py-1.5 rounded-[18px]">
+                                <h5 class="font-bold text-[12px] text-slate-900">{{reply?.commentCreator?.name}}</h5>
+                                <p class="text-[14px] text-[#050505]">{{reply?.content}}</p>
+                            </div>
+                            <div class="flex gap-3 mt-1 ml-2 text-[11px] font-bold text-[#65676B]">
+                                <button class="hover:underline">Like</button>
+                                <button class="hover:underline">Reply</button>
+                                <span class="font-normal">{{reply.createdAt | timeAgo }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                    }
+
+                    @if (activeCommentId === comment._id) {
+                    <div class="flex gap-2 items-start mt-3">
+                        <img [src]="currentUser?.photo"
+                            class="size-8 rounded-full shrink-0 border border-slate-100 shadow-sm">
+
+                        <div class="flex-1 bg-[#F0F2F5] rounded-[18px] px-3 py-2">
+                            <h5 class="text-[13px] font-bold text-[#050505] mb-0.5 leading-tight">
+                                {{currentUser?.name}}
+                            </h5>
+
+                            <div class="flex items-center gap-1">
+                                <input [formControl]="replyContent" (keyup.enter)="submitReply(comment._id)"
+                                    placeholder="Write a public reply..."
+                                    class="bg-transparent border-none outline-none text-[15px] w-full py-0 text-[#050505] placeholder:text-[#65676B]">
+
+                                <div class="flex gap-2 text-[#65676B] text-[16px]">
+                                    <i class="fa-regular fa-face-smile hover:text-[#1877F2] cursor-pointer"></i>
+                                    <i class="fa-solid fa-camera hover:text-[#1877F2] cursor-pointer"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ml-10 mt-1">
+                        <p class="text-[10px] text-slate-400">Press Enter to post.</p>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+
+
+        <div class="flex gap-2.5 mt-4">
+            <img [src]="currentUser.photo" [alt]="currentUser.name"
+                class="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5" />
+
+            <div
+                class="flex-1 bg-[#f0f2f5] border border-transparent focus-within:border-slate-300 transition-all rounded-[16px] flex flex-col pt-1 pb-1.5 px-1.5 min-h-[80px]">
+
+                <textarea [formControl]="content"
+                    class="w-full bg-transparent border-none text-[13px] text-slate-800 placeholder-slate-500 resize-none outline-none px-3 pt-2 pb-1.5 flex-1"
+                    placeholder="Comment as {{currentUser.name}}...">
+                </textarea>
+
+                @if (imgUrl) {
+                <div class="flex flex-wrap gap-2 px-3 my-2">
+                    <div class="relative w-32 h-32 border border-slate-200 rounded-lg overflow-hidden">
+                        <img [src]="imgUrl" class="w-full h-full object-cover" alt="Selected Image">
+
+                        <button type="button" (click)="removeImg()"
+                            class="absolute top-1 right-1 bg-gray-800/60 hover:bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors cursor-pointer z-10">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                }
+
+                <div class="flex items-center justify-between px-2">
+                    <div class="flex items-center gap-1 text-slate-500">
+                        <input (change)="changeImg($event)" type="file" [id]="'comment-file-' + postId" class="hidden"
+                            accept="image/*" />
+                        <label [for]="'comment-file-' + postId"
+                            class="w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-slate-200 rounded-full transition-colors">
+                            <i class="fa-regular fa-image text-[1rem]" [class.text-blue-500]="imgUrl"></i>
+                        </label>
+
+                        <button
+                            class="w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-slate-200 rounded-full transition-colors">
+                            <i class="fa-regular fa-face-smile text-[1rem]"></i>
+                        </button>
+                    </div>
+
+                    <button (click)="sendComment($event)" [disabled]="!content.value"
+                        class="w-7 h-7 cursor-pointer rounded-full bg-blue-400 text-white">
+                        <i [class]="isEditMode ? 'fa-solid fa-check' : 'fa-solid fa-paper-plane'"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    }
+</section>
+}

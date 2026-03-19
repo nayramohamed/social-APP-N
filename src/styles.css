@@ -1,0 +1,50 @@
+/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+@import "flowbite/src/themes/default";
+@plugin "flowbite/plugin";
+@source "../node_modules/flowbite";
+@import 'ngx-toastr/toastr';
+
+@theme {
+    --color-mainColor: #00298D;
+    --color-secondColor: #F0F2F5;
+}
+
+@utility container {
+    margin-inline:auto;
+}
+
+body {
+    background-color: var(--color-secondColor);
+    font-family: "SN Pro", sans-serif;
+}
+
+#toast-container>div {
+    width: 210px;
+    padding: 10px 12px 10px 50px;
+    background-position: 15px center;
+    background-size: 18px;    border-radius: 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toast-title {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.toast-message {
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.toast-success {
+    background-color: #16a34a;
+}
+
+.toast-error {
+    background-color: #dc2626;
+}

@@ -1,0 +1,78 @@
+<aside
+    class="bg-white rounded-2xl lg:rounded-[20px] shadow-sm border border-slate-100 p-3 lg:p-4 font-sans lg:col-start-3 lg:row-start-1">
+
+    <div class="flex items-center justify-between px-1">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-user-group text-blue-600 text-[1.1rem]"></i>
+            <h2 class="font-bold text-slate-900 text-[15px] lg:text-[16px]">Suggested Friends</h2>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <span class="bg-slate-100 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-full">5</span>
+
+            <button (click)="showSuggestedFriends = !showSuggestedFriends"
+                class="text-blue-600 font-bold text-[14px] hover:underline block lg:hidden focus:outline-none w-10 text-right">
+                {{ showSuggestedFriends ? 'Hide' : 'Show' }}
+            </button>
+        </div>
+    </div>
+
+    <div class="mt-4 lg:block" [class.hidden]="!showSuggestedFriends">
+
+        <div class="relative mb-4">
+            <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i>
+            </div>
+            <input type="text"
+                class="bg-white border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 placeholder-slate-400 outline-none transition-all"
+                placeholder="Search friends..." aria-label="Search friends" />
+        </div>
+
+        <div class="grid gap-3">
+            @for (user of suggestedUsers; track user._id) {
+            <div
+                class="p-2 border border-slate-200 rounded-2xl bg-white hover:border-slate-300 transition-colors w-[94%] ml-1 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <img [src]="user.photo" [alt]="user.name"
+                        class="w-11 h-11 rounded-full object-cover shrink-0 bg-slate-100 border border-slate-50"
+                        onerror="this.src='assets/images/default-avatar.png'" />
+
+                    <div class="flex-1 min-w-0 flex flex-col gap-2">
+                        <div class="flex items-center justify-between gap-2 mt-0.5">
+                            <div class="flex flex-col min-w-0">
+                                <span class="text-[14px] font-bold text-slate-900 truncate leading-tight">
+                                    {{ user.name }}
+                                </span>
+                                <span class="text-[13px] text-slate-500 truncate leading-tight mt-0.5">
+                                    @{{ user.name.split(' ')[0].toLowerCase() }}
+                                </span>
+                            </div>
+
+                            <button
+                                class="shrink-0 flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white text-[12px] font-bold rounded-xl transition-all">
+                                <i class="fa-solid fa-user-plus text-[10px]"></i>
+                                <span>Follow</span>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="text-[10px] font-semibold text-slate-500 bg-slate-100/80 px-2 py-0.5 rounded-md">
+                                New Member
+                            </span>
+                            <span class="text-[10px] font-semibold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md">
+                                Suggestion
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+
+        <button
+            class="w-full cursor-pointer mt-3 py-2.5 bg-white border border-slate-200 rounded-xl text-[14px] font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all outline-none focus:ring-4 focus:ring-slate-100">
+            View more
+        </button>
+    </div>
+</aside>
