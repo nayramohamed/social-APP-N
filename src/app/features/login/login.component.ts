@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/auth/services/auth.service';
@@ -12,19 +12,22 @@ import { AuthService } from '../../core/auth/services/auth.service';
   styleUrl: './login.component.css',
 })
 export class LoginComponent {
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly fb = inject(FormBuilder); 
 
-  loginForm: FormGroup = this.fb.group({
-    login: ['', [Validators.required, Validators.minLength(3)]],
-    password: ['', [Validators.required, Validators.pattern(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/)]]
+   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
+  loginForm: FormGroup = new FormGroup({
+   
+    login: new FormControl("", [Validators.required, Validators.minLength(3)]),
+    password: new FormControl("", [Validators.required, Validators.pattern(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/)]),
+   
   });
 
   msgError: string = "";
   loading: boolean = false;
   loginSubscribe: Subscription = new Subscription();
   isPasswordVisible: boolean = false;
+
 
   submitForm(): void {
     if (this.loginForm.valid) {
@@ -35,17 +38,20 @@ export class LoginComponent {
       this.loginSubscribe = this.authService.signIn(this.loginForm.value).subscribe({
         next: (res) => {
           if (res.success) {
+
             localStorage.setItem('socialToken', res.data.token);
             localStorage.setItem('socialUser', JSON.stringify(res.data.user));
             this.router.navigate(['/feed'])
           }
         },
-        error: (err: HttpErrorResponse) => {
+        error: (err:HttpErrorResponse) => {
+          // this.msgError = err.error.message;
           this.loading = false;
         },
         complete: () => {
           this.loading = false;
         }
+
       })
     }
     else {
