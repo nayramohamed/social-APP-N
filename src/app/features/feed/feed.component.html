@@ -1,4 +1,7 @@
-<section class="py-4 lg:py-6 bg-[#f4f6f8] min-h-screen">
+<section 
+    class="py-4 lg:py-6 min-h-screen"
+    [class.bg-[#f4f6f8]]="!isDarkMode"
+    [class.bg-[#111827]]="isDarkMode">
     <div
         class="max-w-screen-xl mx-auto p-2 grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)_320px] gap-4 lg:gap-6 items-start">
 

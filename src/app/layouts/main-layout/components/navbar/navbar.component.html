@@ -6,6 +6,20 @@
         </a>
 
         <div class="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+            
+            <!-- Theme Toggle Button -->
+            <button 
+                (click)="toggleTheme()"
+                class="theme-toggle-btn p-2 rounded-full transition-all duration-300 hover:bg-neutral-secondary-soft focus:outline-none focus:ring-2 focus:ring-neutral-tertiary"
+                [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'">
+                @if (!isDarkMode) {
+                    <span>☀️</span>
+                }
+                @if (isDarkMode) {
+                    <span>🌙</span>
+                }
+            </button>
+
             <div class="relative inline-block">
 
                 <button type="button"

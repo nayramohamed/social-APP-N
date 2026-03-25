@@ -1,14 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ThemeService } from '../../core/auth/services/theme.service';
 import { FeedContentComponent } from './components/feed-content/feed-content.component';
 import { SideLeftComponent } from './components/side-left/side-left.component';
 import { SideRightComponent } from './components/side-right/side-right.component';
 
 @Component({
   selector: 'app-feed',
-  imports: [FeedContentComponent,SideLeftComponent,SideRightComponent],
+  imports: [FeedContentComponent, SideLeftComponent, SideRightComponent],
   templateUrl: './feed.component.html',
   styleUrl: './feed.component.css',
 })
-export class FeedComponent {
+export class FeedComponent implements OnInit {
+  isDarkMode = false;
 
+  constructor(private themeService: ThemeService) {}
+
+  ngOnInit(): void {
+    this.themeService.currentTheme$.subscribe(theme => {
+      this.isDarkMode = theme === 'dark';
+    });
+  }
 }
